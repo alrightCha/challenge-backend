@@ -3,7 +3,7 @@ import { BearController } from './controller/bear.controller';
 import { BearService } from './service/bear.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import ORMConfig = require("./config/typeOrmConfig");
-import {BearRepositoryProvider} from "./persistence/bear.repository";
+import {BearRepositoryProvider} from "./persistence/repositories/bear.repository";
 
 @Module({
     imports: [

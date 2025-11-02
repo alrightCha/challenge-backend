@@ -1,9 +1,9 @@
 import {integrationTestModule, integrationTestTeardown} from "../integration-test.module";
-import {BearRepository} from "../persistence/bear.repository";
+import {BearRepository} from "../persistence/repositories/bear.repository";
 import {AppDataSource} from "../config/data-source";
 import {TransactionalTestContext} from "typeorm-transactional-tests";
 import {BearController} from "./bear.controller";
-import {Bear} from "../persistence/bear.entity";
+import {Bear} from "../persistence/entities/bear.entity";
 import {BadRequestException} from "@nestjs/common";
 
 jest.setTimeout(60000);

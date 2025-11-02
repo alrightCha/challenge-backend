@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
 import { DataSource } from 'typeorm';
 import {AppDataSource} from "./config/data-source";
-import {BearRepositoryProvider} from "./persistence/bear.repository";
+import {BearRepositoryProvider} from "./persistence/repositories/bear.repository";
 import {BearController} from "./controller/bear.controller";
 import {BearService} from "./service/bear.service";
 

@@ -1,5 +1,5 @@
 import {BadRequestException, Injectable, Logger} from '@nestjs/common';
-import {BearRepository} from "../persistence/bear.repository";
+import {BearRepository} from "../persistence/repositories/bear.repository";
 
 @Injectable()
 export class BearService {

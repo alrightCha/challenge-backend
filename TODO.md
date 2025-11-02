@@ -1,0 +1,3 @@
+- Implement CRUD endpoints for bears & colors (create, read, update, delete)
+- NOTE: deleting a color deletes all bears associated with that color 
+- Add endpoint that searches for bears by one or more colors 
