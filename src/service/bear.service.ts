@@ -78,6 +78,12 @@ export class BearService {
     return isDeleted;
   }
 
+  //Replace all colors for bear
+  async updateBearColors(bearId: number, colors: string[]): Promise<boolean> {
+    const isUpdated = await this.bearRepository.updateBearColors(bearId, colors);
+    return isUpdated;
+  }
+
   //DELETE BEAR
   async deleteBear(bearId: number): Promise<boolean> {
     const isDeleted = await this.bearRepository.deleteBear(bearId);

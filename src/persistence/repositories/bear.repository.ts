@@ -136,6 +136,102 @@ export class BearRepository extends Repository<Bear> {
     return colorExistsForBear > 0;
   }
 
+  async updateBearColors(bearId: number, colors: string[]): Promise<boolean> {
+    return this.dataSource.transaction(async (manager) => {
+      // 1. Check if bear exists
+      const bear = await manager.findOne(Bear, {
+        where: { id: bearId },
+        relations: ['bearColors', 'bearColors.color']
+      });
+      if (!bear) {
+        throw new Error("Bear not found");
+      }
+
+      // 2. Normalize new color names
+      const wantedNames = Array.from(
+        new Set(
+          colors.map((c) => c.trim().toLowerCase()).filter((c) => c.length > 0)
+        )
+      );
+
+      // 3. Get current color names for this bear
+      const currentColorNames = new Set(
+        bear.bearColors.map((bc) => bc.color.name.toLowerCase())
+      );
+
+      // 4. Calculate diff: colors to add and colors to remove
+      const colorsToAdd = wantedNames.filter((name) => !currentColorNames.has(name));
+      const colorsToRemove = Array.from(currentColorNames).filter(
+        (name) => !wantedNames.includes(name)
+      );
+
+      // 5. Early return if no changes needed
+      if (colorsToAdd.length === 0 && colorsToRemove.length === 0) {
+        return true;
+      }
+
+      // 6. Remove colors that are no longer wanted
+      if (colorsToRemove.length > 0) {
+        const colorsToRemoveIds = bear.bearColors
+          .filter((bc) => colorsToRemove.includes(bc.color.name.toLowerCase()))
+          .map((bc) => bc.color.id);
+
+        if (colorsToRemoveIds.length > 0) {
+          await manager.delete(BearColors, {
+            bear_id: bearId,
+            color_id: In(colorsToRemoveIds),
+          });
+        }
+      }
+
+      // 7. Add new colors
+      if (colorsToAdd.length > 0) {
+        // Get existing colors from database
+        const existingColors = await manager.find(Color, {
+          where: { name: In(colorsToAdd) },
+        });
+
+        const existingByName = new Map(existingColors.map((c) => [c.name, c.id]));
+
+        // Create any missing colors
+        const missingNames = colorsToAdd.filter((n) => !existingByName.has(n));
+
+        if (missingNames.length > 0) {
+          await manager
+            .createQueryBuilder()
+            .insert()
+            .into(Color)
+            .values(missingNames.map((n) => ({ name: n })))
+            .orIgnore()
+            .execute();
+        }
+
+        // Get all colors to add (including newly created ones)
+        const allColorsToAdd = await manager.find(Color, {
+          where: { name: In(colorsToAdd) },
+        });
+
+        const colorIdsToAdd = allColorsToAdd.map((c) => c.id);
+
+        // Create new BearColors associations
+        const linkRows = colorIdsToAdd.map((colorId) => ({
+          bear_id: bearId,
+          color_id: colorId,
+        }));
+
+        await manager
+          .createQueryBuilder()
+          .insert()
+          .into(BearColors)
+          .values(linkRows)
+          .orIgnore()
+          .execute();
+      }
+
+      return true;
+    });
+  }
+
   async getBearsWithColors(): Promise<Bear[]> {
     return this.createQueryBuilder("bear")
       .leftJoinAndSelect("bear.bearColors", "bc")

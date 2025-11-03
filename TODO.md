@@ -5,11 +5,11 @@
 - [DONE] Enable cors policy to communicate with the client 
 
 - [DONE] Update all GET endpoints to return bear colors as well 
-- Add DTO for all endpoints for cleaner API handling by client & clearer format
+- [DONE] Add DTO for all endpoints for cleaner API handling by client & clearer format
 
 * EXTRAS 
 
-- middleware for rate-limiting 
+- [DONE] middleware for rate-limiting 
 - redis queue for caching current bears 
 - producer / consumer for creating, updating and deleting elements
 
@@ -28,7 +28,7 @@
 - [DONE] Delete bear
 - [DONE] Delete Color 
 
-- Add update to bears for name, size & colors 
+- [DONE] Add update to bears for name, size & colors 
 
 * Testing 
 

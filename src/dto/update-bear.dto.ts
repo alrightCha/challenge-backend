@@ -1,4 +1,4 @@
-import { IsString, IsInt, Min, IsOptional, MaxLength } from 'class-validator';
+import { IsString, IsInt, Min, IsOptional, MaxLength, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class UpdateBearDto {
@@ -12,4 +12,9 @@ export class UpdateBearDto {
   @Min(1, { message: 'Size must be at least 1' })
   @Type(() => Number)
   size?: number;
+
+  @IsOptional()
+  @IsArray({ message: 'Colors must be an array' })
+  @IsString({ each: true, message: 'Each color must be a string' })
+  colors?: string[];
 }

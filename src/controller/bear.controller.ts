@@ -67,10 +67,10 @@ export class BearController {
     @Param("id", ParseIntPipe) id: number,
     @Body() updateBearDto: UpdateBearDto
   ) {
-    const { name, size } = updateBearDto;
+    const { name, size, colors } = updateBearDto;
 
-    if (!name && !size) {
-      throw new BadRequestException("At least one field (name or size) must be provided for update");
+    if (!name && !size && !colors) {
+      throw new BadRequestException("At least one field (name, size, or colors) must be provided for update");
     }
 
     if (name) {
@@ -78,6 +78,9 @@ export class BearController {
     }
     if (size) {
       await this.bearService.updateBearSize(id, size);
+    }
+    if (colors) {
+      await this.bearService.updateBearColors(id, colors);
     }
 
     return { success: true, message: "Bear updated successfully" };
