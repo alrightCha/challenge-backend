@@ -9,6 +9,6 @@ export class Color {
     @Column()
     name: string;
 
-    @OneToMany(() => BearColors, (bc) => bc.color_id)
+    @OneToMany(() => BearColors, (bc) => bc.color)
     bearColors: BearColors[]
 }

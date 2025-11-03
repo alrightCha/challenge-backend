@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { BearColors } from './bearcolors.entity';
 
-@Entity()
+@Entity("bear")
 export class Bear {
     @PrimaryGeneratedColumn()
     id: number;
@@ -12,6 +12,6 @@ export class Bear {
     @Column()
     size: number;
 
-    @OneToMany(() => BearColors, (bc) => bc.bear_id, { cascade: true})
+    @OneToMany(() => BearColors, (bc) => bc.bear, { cascade: true})
     bearColors: BearColors[]; 
 }

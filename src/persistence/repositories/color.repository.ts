@@ -19,7 +19,7 @@ export class ColorRepository extends Repository<Color> {
     const result = await this.insert({ name });
     return result.identifiers[0].id as number;
   }
-  
+
   //Get all colors and their respective ids
   async getColors(): Promise<Color[]> {
     const result = await this.find();
@@ -27,10 +27,11 @@ export class ColorRepository extends Repository<Color> {
   }
 
   //Delete a color & returns if deleted at least a row (true)
-  async deleteColor(name: string): Promise<Boolean> {
+  async deleteColor(name: string): Promise<boolean> {
     return this.dataSource.transaction(async (manager) => {
       // find color id
-      const color = await manager.findOne(Color, { where: { name } });
+      const correctName = name.trim().toLowerCase(); 
+      const color = await manager.findOne(Color, { where: { name :correctName } });
       if (!color) {
         return false;
       }
