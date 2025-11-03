@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Put,
   ParseArrayPipe,
+  Post,
 } from "@nestjs/common";
 import { BearService } from "../service/bear.service";
 import { Bear } from "../persistence/entities/bear.entity";
@@ -14,6 +15,16 @@ import { Bear } from "../persistence/entities/bear.entity";
 @Controller("bear")
 export class BearController {
   constructor(private readonly bearService: BearService) {}
+
+  @Post(":name/:size/:colors")
+  async createNewBear(
+    @Param("name") name: string,
+    @Param("size", ParseIntPipe) size: number,
+    @Param("colors", new ParseArrayPipe({ items: String, separator: "," }))
+    colors: string[]
+  ): Promise<boolean> {
+    return this.bearService.createNewBear(name, colors, size);
+  }
 
   @Get("size-in-range/:start/:end")
   getBearBySizeInRange(
@@ -59,7 +70,7 @@ export class BearController {
     const isNameUpdate = newName != "";
     const isSizeUpdate = newSize > 0;
 
-    if (!isNameUpdate || isSizeUpdate) {
+    if (!isNameUpdate && isSizeUpdate) {
       throw new Error("Wrong parameters provided");
     }
     if (isNameUpdate) {
