@@ -1,12 +1,7 @@
-import {
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-} from "@nestjs/common";
+import { Controller, Delete, Get, Param, Post, Body } from "@nestjs/common";
 import { ColorService } from "../service/color.service";
 import { Color } from "../persistence/entities/color.entity";
+import { CreateColorDto } from "../dto";
 
 @Controller("color")
 export class ColorController {
@@ -17,9 +12,10 @@ export class ColorController {
     return this.colorService.getColors();
   }
 
-  @Post("create/:color")
-  async createColor(@Param("color") color: string): Promise<number> {
-    const colorId = await this.colorService.createNewColor(color);
+  @Post()
+  async createColor(@Body() createColorDto: CreateColorDto): Promise<number> {
+    const { name, hex } = createColorDto;
+    const colorId = await this.colorService.createNewColor(name, hex);
     return colorId;
   }
 

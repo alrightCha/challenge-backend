@@ -11,12 +11,12 @@ export class ColorRepository extends Repository<Color> {
   }
 
   //Inserts a color and returns its id if needed to be used
-  async addColor(name: string): Promise<number> {
+  async addColor(name: string, hex: string): Promise<number> {
     const existing = await this.findOne({ where: { name } });
     if (existing) {
       return existing.id;
     }
-    const result = await this.insert({ name });
+    const result = await this.insert({ name, hex });
     return result.identifiers[0].id as number;
   }
 
@@ -30,8 +30,10 @@ export class ColorRepository extends Repository<Color> {
   async deleteColor(name: string): Promise<boolean> {
     return this.dataSource.transaction(async (manager) => {
       // find color id
-      const correctName = name.trim().toLowerCase(); 
-      const color = await manager.findOne(Color, { where: { name :correctName } });
+      const correctName = name.trim().toLowerCase();
+      const color = await manager.findOne(Color, {
+        where: { name: correctName },
+      });
       if (!color) {
         return false;
       }

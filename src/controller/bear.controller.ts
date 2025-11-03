@@ -8,21 +8,19 @@ import {
   Put,
   ParseArrayPipe,
   Post,
+  Body,
 } from "@nestjs/common";
 import { BearService } from "../service/bear.service";
 import { Bear } from "../persistence/entities/bear.entity";
+import { CreateBearDto, UpdateBearDto } from "../dto";
 
 @Controller("bear")
 export class BearController {
   constructor(private readonly bearService: BearService) {}
 
-  @Post(":name/:size/:colors")
-  async createNewBear(
-    @Param("name") name: string,
-    @Param("size", ParseIntPipe) size: number,
-    @Param("colors", new ParseArrayPipe({ items: String, separator: "," }))
-    colors: string[]
-  ): Promise<boolean> {
+  @Post()
+  async createNewBear(@Body() createBearDto: CreateBearDto): Promise<boolean> {
+    const { name, size, colors = [] } = createBearDto;
     return this.bearService.createNewBear(name, colors, size);
   }
 
@@ -57,28 +55,32 @@ export class BearController {
   }
 
   @Get("colors/:colors")
-  getBearsByColor(@Param("colors") colors: number[]): Promise<Bear[]> {
+  getBearsByColor(
+    @Param("colors", new ParseArrayPipe({ items: Number, separator: "," }))
+    colors: number[]
+  ): Promise<Bear[]> {
     return this.bearService.findBearByColor(colors);
   }
 
-  @Put(":id/:name/:size")
-  async putBear(
+  @Put(":id")
+  async updateBear(
     @Param("id", ParseIntPipe) id: number,
-    @Param("name") newName: string,
-    @Param("size") newSize: number
+    @Body() updateBearDto: UpdateBearDto
   ) {
-    const isNameUpdate = newName != "";
-    const isSizeUpdate = newSize > 0;
+    const { name, size } = updateBearDto;
 
-    if (!isNameUpdate && isSizeUpdate) {
-      throw new Error("Wrong parameters provided");
+    if (!name && !size) {
+      throw new BadRequestException("At least one field (name or size) must be provided for update");
     }
-    if (isNameUpdate) {
-      await this.bearService.updateBearName(id, newName);
+
+    if (name) {
+      await this.bearService.updateBearName(id, name);
     }
-    if (isSizeUpdate) {
-      await this.bearService.updateBearSize(id, newSize);
+    if (size) {
+      await this.bearService.updateBearSize(id, size);
     }
+
+    return { success: true, message: "Bear updated successfully" };
   }
 
   @Delete(":id")

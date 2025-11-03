@@ -8,9 +8,10 @@ export class ColorService {
 
   // CREATE NEW COLOR 
   async createNewColor(
-    name: string
+    name: string, 
+    hex: string 
   ): Promise<number> {
-    const result = await this.colorRepository.addColor(name);
+    const result = await this.colorRepository.addColor(name, hex);
     return result;
   }
 

@@ -74,11 +74,11 @@ export class BearRepository extends Repository<Bear> {
   }
 
   async findBearBySizeInRange(start: number, end: number): Promise<Bear[]> {
-    return this.find({
-      where: {
-        size: Between(start, end),
-      },
-    });
+    return this.createQueryBuilder("bear")
+      .leftJoinAndSelect("bear.bearColors", "bc")
+      .leftJoinAndSelect("bc.color", "color")
+      .where("bear.size BETWEEN :start AND :end", { start, end })
+      .getMany();
   }
 
   async updateBearSize(bearId: number, newSize: number): Promise<boolean> {
@@ -149,9 +149,10 @@ export class BearRepository extends Repository<Bear> {
     }
 
     return this.createQueryBuilder("bear")
-      .innerJoin("bear.bearColors", "bc")
-      .innerJoin("bc.color", "color")
+      .leftJoinAndSelect("bear.bearColors", "bc")
+      .leftJoinAndSelect("bc.color", "color")
       .where("color.id IN (:...colorList)", { colorList })
+      .distinct(true)
       .getMany();
   }
 
@@ -165,10 +166,10 @@ export class BearRepository extends Repository<Bear> {
     }
 
     return this.createQueryBuilder("bear")
-      .innerJoin("bear.bearColors", "bc")
-      .innerJoin("bc.color", "color")
+      .leftJoinAndSelect("bear.bearColors", "bc")
+      .leftJoinAndSelect("bc.color", "color")
       .where("color.id IN (:...colorList)", { colorList })
-      .andWhere("size BETWEEN :start AND :end", { start, end })
+      .andWhere("bear.size BETWEEN :start AND :end", { start, end })
       .distinct(true)
       .getMany();
   }
