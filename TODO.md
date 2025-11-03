@@ -12,6 +12,7 @@
 - [DONE] middleware for rate-limiting 
 - redis queue for caching current bears 
 - producer / consumer for creating, updating and deleting elements
+- update sample data to handle new format
 
 * Testing 
 
@@ -29,6 +30,9 @@
 - [DONE] Delete Color 
 
 - [DONE] Add update to bears for name, size & colors 
+
+- [DONE] Cache latest filter params for better User experience 
+- [DONE] Cache latest query for better responsiveness 
 
 * Testing 
 
