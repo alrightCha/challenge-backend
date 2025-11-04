@@ -5,6 +5,9 @@ import {AppDataSource} from "./config/data-source";
 import {BearRepositoryProvider} from "./persistence/repositories/bear.repository";
 import {BearController} from "./controller/bear.controller";
 import {BearService} from "./service/bear.service";
+import { ColorRepositoryProvider } from './persistence/repositories/color.repository';
+import { ColorController } from './controller/color.controller';
+import { ColorService } from './service/color.service';
 
 let dbContainer: StartedTestContainer;
 let dataSource: DataSource;
@@ -18,6 +21,9 @@ export async function integrationTestModule(): Promise<TestingModule> {
             BearRepositoryProvider,
             BearController,
             BearService,
+            ColorRepositoryProvider,
+            ColorController,
+            ColorService,
             {
                 provide: DataSource,
                 useFactory: setupTestContainer
