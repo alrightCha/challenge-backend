@@ -1,10 +1,15 @@
 import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 import { BearRepository } from "../persistence/repositories/bear.repository";
 import { Bear } from "../persistence/entities/bear.entity";
+import { JobType, LocalQueueService } from "../queue/local-queue.service";
+import { MemoryCacheService } from "../cache/memory-cache.service";
 
 @Injectable()
 export class BearService {
-  constructor(private readonly bearRepository: BearRepository) {}
+  constructor(
+    private readonly queueService: LocalQueueService,
+    private readonly cacheService: MemoryCacheService
+  ) {}
 
   // CREATE NEW BEAR
   async createNewBear(
@@ -12,35 +17,28 @@ export class BearService {
     colors: string[],
     size: number
   ): Promise<boolean> {
-    const result = await this.bearRepository.addBear(name, size, colors);
-    return result;
+    this.queueService.enqueue(JobType.CREATE_BEAR, { name, size, colors });
+    await this.queueService.waitForProcessing();
+    return true;
   }
 
   // READ
 
   //Find bear by size
-  async findBearBySizeInRange(start: number, end: number): Promise<Bear[]> {
-    const bears = await this.bearRepository.findBearBySizeInRange(start, end);
+  findBearBySizeInRange(start: number, end: number): Bear[] {
+    const bears = this.cacheService.getBearBySizeInRange(start, end);
     return bears;
   }
 
   //Find bear by color (or find all bears)
-  async findBearByColor(colors: number[]): Promise<Bear[]> {
-    const bears = await this.bearRepository.findBearByColors(colors);
+  findBearByColor(colors: number[]): Bear[] {
+    const bears = this.cacheService.getBearsByColors(colors);
     return bears;
   }
 
   //Find bear by color(s) and size
-  async findBearByColorAndSize(
-    colors: number[],
-    start: number,
-    end: number
-  ): Promise<Bear[]> {
-    const bears = await this.bearRepository.findBearByColorsAndSizes(
-      colors,
-      start,
-      end
-    );
+  findBearByColorAndSize(colors: number[], start: number, end: number): Bear[] {
+    const bears = this.cacheService.getBearsByColorsAndSize(colors, start, end);
     return bears;
   }
 
@@ -48,45 +46,42 @@ export class BearService {
 
   //Update size for bear
   async updateBearSize(bearId: number, bearSize: number): Promise<boolean> {
-    const isUpdated = await this.bearRepository.updateBearSize(
-      bearId,
-      bearSize
-    );
-    return isUpdated;
+    this.queueService.enqueue(JobType.UPDATE_BEAR_SIZE, {
+      id: bearId,
+      size: bearSize,
+    });
+    await this.queueService.waitForProcessing();
+    return true;
   }
 
   //Update name for bear
   async updateBearName(bearId: number, newName: string): Promise<boolean> {
-    const isUpdated = await this.bearRepository.updateBearName(bearId, newName);
-    return isUpdated;
+    this.queueService.enqueue(JobType.UPDATE_BEAR_NAME, {
+      id: bearId,
+      name: newName,
+    });
+    await this.queueService.waitForProcessing();
+    return true;
   }
 
   //Update colors for bear
 
-  //Add color
-  async addBearColor(bearId: number, newColor: number): Promise<boolean> {
-    const isUpdated = await this.bearRepository.addColorToBear(
-      bearId,
-      newColor
-    );
-    return isUpdated;
-  }
-
-  //Remove color for bear
-  async deleteBearColor(bearId: number, color: number): Promise<boolean> {
-    const isDeleted = await this.bearRepository.removeBearColor(bearId, color);
-    return isDeleted;
-  }
-
   //Replace all colors for bear
   async updateBearColors(bearId: number, colors: string[]): Promise<boolean> {
-    const isUpdated = await this.bearRepository.updateBearColors(bearId, colors);
-    return isUpdated;
+    this.queueService.enqueue(JobType.UPDATE_BEAR_COLORS, {
+      id: bearId,
+      colors: colors,
+    });
+    await this.queueService.waitForProcessing();
+    return true;
   }
 
   //DELETE BEAR
   async deleteBear(bearId: number): Promise<boolean> {
-    const isDeleted = await this.bearRepository.deleteBear(bearId);
-    return isDeleted;
+    this.queueService.enqueue(JobType.DELETE_BEAR, {
+      id: bearId,
+    });
+    await this.queueService.waitForProcessing();
+    return true;
   }
 }

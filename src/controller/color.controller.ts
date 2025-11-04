@@ -8,19 +8,19 @@ export class ColorController {
   constructor(private readonly colorService: ColorService) {}
 
   @Get("all")
-  getColors(): Promise<Color[]> {
+  getColors(): Color[] {
     return this.colorService.getColors();
   }
 
   @Post()
-  async createColor(@Body() createColorDto: CreateColorDto): Promise<number> {
+  async createColor(@Body() createColorDto: CreateColorDto): Promise<boolean> {
     const { name, hex } = createColorDto;
     const colorId = await this.colorService.createNewColor(name, hex);
     return colorId;
   }
 
   @Delete(":color")
-  async deleteColor(@Param("color") color: string) {
+  async deleteColor(@Param("color") color: string): Promise<boolean> {
     const deletion = await this.colorService.deleteColor(color);
     return deletion;
   }

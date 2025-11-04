@@ -1,30 +1,38 @@
-import { BadRequestException, Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ColorRepository } from "../persistence/repositories/color.repository";
 import { Color } from "../persistence/entities/color.entity";
+import { JobType, LocalQueueService } from "../queue/local-queue.service";
+import { MemoryCacheService } from "../cache/memory-cache.service";
 
 @Injectable()
 export class ColorService {
-  constructor(private readonly colorRepository: ColorRepository) {}
+  constructor(
+    private readonly queueService: LocalQueueService,
+    private readonly cacheService: MemoryCacheService
+  ) {}
 
-  // CREATE NEW COLOR 
-  async createNewColor(
-    name: string, 
-    hex: string 
-  ): Promise<number> {
-    const result = await this.colorRepository.addColor(name, hex);
-    return result;
+  //TODO: CHeck return type
+  // CREATE NEW COLOR
+  async createNewColor(name: string, hex: string): Promise<boolean> {
+    this.queueService.enqueue(JobType.ADD_COLOR, {
+      name: name,
+      hex: hex,
+    });
+    await this.queueService.waitForProcessing();
+    return true;
   }
 
   // DELETE COLOR
   async deleteColor(colorName: string): Promise<boolean> {
-    const isDeleted = await this.colorRepository.deleteColor(colorName);
-    return isDeleted;
+    this.queueService.enqueue(JobType.DELETE_COLOR, {
+      name: colorName,
+    });
+    await this.queueService.waitForProcessing();
+    return true;
   }
 
-
   //GET ALL COLORS
-  async getColors(): Promise<Color[]> {
-    const colors = await this.colorRepository.getColors();
-    return colors;
+  getColors(): Color[] {
+    return this.cacheService.getAllColors();
   }
 }

@@ -10,6 +10,10 @@ import { ColorService } from "./service/color.service";
 import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
 import { APP_GUARD } from "@nestjs/core";
 import { LoggerMiddleware } from "./logger.middleware";
+import { ScheduleModule } from '@nestjs/schedule';
+import { MemoryCacheService } from './cache/memory-cache.service';
+import { LocalQueueService } from './queue/local-queue.service';
+import { QueueProcessorService } from './queue/queue-processor.service';
 
 @Module({
   imports: [
@@ -20,6 +24,7 @@ import { LoggerMiddleware } from "./logger.middleware";
         limit: 100, // Maximum number of requests per ttl window per IP
       },
     ]),
+    ScheduleModule.forRoot()
   ],
   controllers: [BearController, ColorController],
   providers: [
@@ -31,6 +36,9 @@ import { LoggerMiddleware } from "./logger.middleware";
       provide: APP_GUARD,
       useClass: ThrottlerGuard, // Apply rate limiting globally to all routes
     },
+    MemoryCacheService,      
+    LocalQueueService,       
+    QueueProcessorService,
   ],
 })
 export class AppModule implements NestModule {

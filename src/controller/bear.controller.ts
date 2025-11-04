@@ -21,14 +21,14 @@ export class BearController {
   @Post()
   async createNewBear(@Body() createBearDto: CreateBearDto): Promise<boolean> {
     const { name, size, colors = [] } = createBearDto;
-    return this.bearService.createNewBear(name, colors, size);
+    return await this.bearService.createNewBear(name, colors, size);
   }
 
   @Get("size-in-range/:start/:end")
   getBearBySizeInRange(
     @Param("start") start: number,
     @Param("end") end: number
-  ): Promise<Bear[]> {
+  ): Bear[] {
     if (start > end) {
       throw new BadRequestException(`Start ${start} is larger than end ${end}`);
     }
@@ -42,7 +42,7 @@ export class BearController {
     colors: number[],
     @Param("start") start: number,
     @Param("end") end: number
-  ): Promise<Bear[]> {
+  ): Bear[] {
     if (start > end) {
       throw new BadRequestException(`Start ${start} is larger than end ${end}`);
     }
@@ -58,7 +58,7 @@ export class BearController {
   getBearsByColor(
     @Param("colors", new ParseArrayPipe({ items: Number, separator: "," }))
     colors: number[]
-  ): Promise<Bear[]> {
+  ): Bear[] {
     return this.bearService.findBearByColor(colors);
   }
 
@@ -70,7 +70,9 @@ export class BearController {
     const { name, size, colors } = updateBearDto;
 
     if (!name && !size && !colors) {
-      throw new BadRequestException("At least one field (name, size, or colors) must be provided for update");
+      throw new BadRequestException(
+        "At least one field (name, size, or colors) must be provided for update"
+      );
     }
 
     if (name) {
@@ -87,7 +89,7 @@ export class BearController {
   }
 
   @Delete(":id")
-  async deleteBear(@Param("id", ParseIntPipe) id: number) {
+  async deleteBear(@Param("id", ParseIntPipe) id: number): Promise<boolean> {
     const deletion = await this.bearService.deleteBear(id);
     return deletion;
   }
